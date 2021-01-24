@@ -1,7 +1,7 @@
 # 唯一の榛名
-[![License](https://img.shields.io/github/license/hausen-wu-23/One-True-Haruna?style=flat-square)](https://opensource.org/licenses/BSD-3-Clause)
-![Dependencies](https://img.shields.io/librariesio/github/hausen-wu-23/One-True-Haruna?style=flat-square)
-[![Issues](https://img.shields.io/github/issues/hausen-wu-23/One-True-Haruna?style=flat-square)](https://github.com/hausen-wu-23/One-True-Haruna/issues)
+[![License](https://img.shields.io/github/license/hourai39/One-True-Haruna?style=flat-square)](https://opensource.org/licenses/BSD-3-Clause)
+![Dependencies](https://img.shields.io/librariesio/github/hourai39/One-True-Haruna?style=flat-square)
+[![Issues](https://img.shields.io/github/issues/hausen-wu-23/One-True-Haruna?style=flat-square)](https://github.com/hourai39/One-True-Haruna/issues)
 
 Haruna is a work-in-progress music player bot for Discord servers.
 ### Dependencies
