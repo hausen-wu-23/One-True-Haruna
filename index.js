@@ -18,7 +18,7 @@ const client = new Discord.Client();
 
 // variable
 var yt_linklist = ["https://www.youtube.com/watch?v=mBgJwg-chyc"];
-var yt_title = ["榛名は、大丈夫です！"];
+var yt_title = ["はい！"];
 
 var voice_connection = false;
 var musik_q_rpt = false;
