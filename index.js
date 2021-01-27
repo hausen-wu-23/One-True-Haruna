@@ -291,16 +291,20 @@ client.on("message", (message) => {
   }
 
   if (message.content === "display queue pls") {
+    let queue_string = "";
     for (var i = 0; i < yt_title.length; i++) {
-      message.channel.send(
-        "``Song " + String(i + 1) + ": " + yt_title[i] + "``"
-      );
+      queue_string += "No " + String(i + 1) + ": " + yt_title[i] + "\n";
     }
+    let embed = new Discord.MessageEmbed()
+      .setColor("86CECB")
+      .setDescription(queue_string);
+    message.channel.send(embed);
   }
 
   if (selection) {
     if (message.content === "c") {
       selection = false;
+      inquiry = [];
       message.channel.send("お問い合わせをキャンセルしました。");
     }
     if (Number(message.content) >= 1 && Number(message.content) <= 20) {
