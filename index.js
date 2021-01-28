@@ -11,14 +11,20 @@ const { repeat, startsWith } = require("ffmpeg-static");
 // require ytsr
 const ytsr = require("ytsr");
 
+// require ytpl
+const ytpl = require("ytpl");
+
 /***********************************************************/
 // create a new Discord client
 const client = new Discord.Client();
 /***********************************************************/
 
 // variable
-var yt_linklist = ["https://www.youtube.com/watch?v=mBgJwg-chyc"];
-var yt_title = ["はい！"];
+// var yt_linklist = ["https://www.youtube.com/watch?v=mBgJwg-chyc"];
+// var yt_title = ["はい！"];
+
+var yt_linklist = ["start","start"];
+var yt_title = ["start","start"];
 
 var voice_connection = false;
 var musik_q_rpt = false;
@@ -39,6 +45,22 @@ function debug_message_log(message, user) {
   console.log("\x1b[36m%s\x1b[0m", "[message] " + message + "\n[user] " + user);
 }
 
+async function pl_yt(message, pl_link) {
+  const yt_playlist = await ytpl(pl_link);
+  let send_string = "";
+  yt_playlist.items.forEach((element, index) => {
+    yt_linklist.push(element.shortUrl);
+    yt_title.push(element.title);
+    send_string += index + 1 + ". " + element.title + "\n";
+  });
+  send_string +=
+    yt_playlist.items.length + " songs were queued successfully! \n";
+  const embed = new Discord.MessageEmbed()
+    .setColor("4f60cc")
+    .setDescription(send_string);
+  message.channel.send(embed);
+}
+
 async function search_yt(message, yttt) {
   const filters1 = await ytsr.getFilters(yttt);
   const filter1 = filters1.get("Type").get("Video");
@@ -50,7 +72,7 @@ async function search_yt(message, yttt) {
   const searchResults = await ytsr(filter1.url, options);
   let send_string = "";
   searchResults.items.forEach((element, index) => {
-    send_string += (index + 1) + ". " + element.title + "\n";
+    send_string += index + 1 + ". " + element.title + "\n";
     inquiry.push(element.url);
   });
   send_string += "Send /'C/' to cancel. \n";
@@ -63,31 +85,46 @@ async function search_yt(message, yttt) {
 }
 
 // audio dispatcher
-async function audio_play(link, title, message, connection) {
+async function audio_play(link = null, title = null, message = null, connection = null, mode = 0) {
   // // acquire link and store in streamable object
   // const stream = ytdl(yt_link, {
   // 	quality: 'highestaudio',
   // 	highWaterMark: 1 << 25
   // });
+  if (yt_linklist[0] != "start") {
+    message.channel.send("Now Playing: " + title);
+    // create stream
+    const stream = await ytdl(link, {
+      quality: "highestaudio",
+      highWaterMark: 1 << 25,
+    });
+    console_debug("stream", "created!");
+    // create streamDispatcher to play audio
+    const dispatcher = connection.play(stream);
+    console_debug("stream", "now playing!");
+    // once finished, leave voice channel
+    dispatcher.on("finish", () => {
+      message.channel.send("Music finished");
+      play_yt_queue(message, connection);
+    });
 
-  message.channel.send("Now Playing: " + title);
-  // create stream
-  const stream = await ytdl(link, {
-    quality: "highestaudio",
-    highWaterMark: 1 << 25,
-  });
-  console_debug("stream", "created!");
-  // create streamDispatcher to play audio
-  const dispatcher = connection.play(stream);
-  console_debug("stream", "now playing!");
-  // once finished, leave voice channel
-  dispatcher.on("finish", () => {
-    message.channel.send("Music finished");
-    play_yt_queue(message, connection);
-  });
+    // always log errors :>
+    dispatcher.on("error", console.error);
+  }
+  else {
+    message.channel.send("test");
+    yt_title.shift();
+    yt_linklist.shift();
+    const dispatcher = connection.play("./audio/主砲砲撃開始.mp3");
+    // once finished, leave voice channel
+    dispatcher.on("finish", () => {
+      message.channel.send("Music finished");
+      play_yt_queue(message, connection);
+    });
 
-  // always log errors :>
-  dispatcher.on("error", console.error);
+    // always log errors :>
+    dispatcher.on("error", console.error);
+  }
 }
 
 // private music playing handler
@@ -267,7 +304,6 @@ client.on("message", (message) => {
     yt_linklist.unshift("https://www.youtube.com/watch?v=xFdDNrd6W9s");
   }
 
-
   if (
     message.content.startsWith("queue") &&
     message.content.split(" ")[2] === "pls"
@@ -280,7 +316,8 @@ client.on("message", (message) => {
 
   if (
     message.content.startsWith("search") &&
-    message.content.split(" ")[message.content.split(" ").length - 1] === "pls" &&
+    message.content.split(" ")[message.content.split(" ").length - 1] ===
+      "pls" &&
     selection == false
   ) {
     let yt_sr = message.content.split(" ");
@@ -293,7 +330,7 @@ client.on("message", (message) => {
   if (message.content === "display queue pls") {
     let queue_string = "";
     for (var i = 0; i < yt_title.length; i++) {
-      queue_string += "No " + String(i + 1) + ": " + yt_title[i] + "\n";
+      queue_string += String(i + 1) + ": " + yt_title[i] + "\n";
     }
     let embed = new Discord.MessageEmbed()
       .setColor("86CECB")
@@ -315,5 +352,15 @@ client.on("message", (message) => {
       console_debug("music queue", "queued successfully!");
       selection = false;
     }
+  }
+
+  if (
+    message.content.startsWith("pl") &&
+    message.content.split(" ")[2] === "pls"
+  ) {
+    let ytpl_link = message.content.split(" ")[1];
+    pl_yt(message, ytpl_link);
+
+    console_debug("music queue", "queued successfully!");
   }
 });
